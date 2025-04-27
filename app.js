@@ -1,37 +1,93 @@
-import express from 'express'; // Importing express
-import { GoogleGenerativeAI } from '@google/generative-ai'; // Import your Google API library
+import express from 'express';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import cors from 'cors';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config();
 
 const app = express();
-const port = 3000; // Port for the server
+const port = 3000;
 
-// Middleware to parse JSON requests (if needed)
-app.use(express.json()); // If you need to handle JSON requests
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, '')));
 
-// Your API key and Google Generative AI setup
-const genAI = new GoogleGenerativeAI("Your API key");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+// Google Generative AI setup
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+    console.error('GEMINI_API_KEY is not set in .env file');
+    process.exit(1);
+}
 
-// Route to get content from the Google API and send it to the frontend
-app.get('/generate-content', async (req, res) => {
-  const prompt = req.query.prompt || "Describe Express.js in short"; // Use query prompt or default one
-  try {
-    // Call the API to generate content
-    const result = await model.generateContent(prompt);
-    const apiResponse = result.response.text(); // Get the text response
-    
-    // Send the response back as plain text
-    res.set('Content-Type', 'text/plain');
-    res.send(apiResponse);
-  } catch (error) {
-    // Handle any errors
-    res.status(500).send('An error occurred while generating content.');
-  }
+// Initialize the Gemini API - using standard configuration
+const genAI = new GoogleGenerativeAI(apiKey);
+
+// Serve index.html at the root route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Serve static files (like HTML, CSS, JS) from the public folder
-app.use(express.static('public'));
+// Handle both GET and POST requests for generating content
+app.get('/generate-content', handleGenerateContent);
+app.post('/generate-content', handleGenerateContent);
 
-// Start the Express server
+async function handleGenerateContent(req, res) {
+    // Get prompt from query string (GET) or request body (POST)
+    const prompt = req.method === 'GET' ? req.query.prompt : req.body.prompt;
+    
+    if (!prompt) {
+        return res.status(400).send('Prompt is required');
+    }
+
+    try {
+        console.log('Generating content for prompt:', prompt);
+        
+        // Get the model - trying both pro versions based on API errors above
+        let model;
+        let responseText;
+        let errorMessage;
+        
+        try {
+            // First try with gemini-pro
+            model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+            const prompt1Result = await model.generateContent(prompt);
+            responseText = prompt1Result.response.text();
+        } catch (error1) {
+            console.log('First model attempt failed:', error1.message);
+            errorMessage = error1.message;
+            
+            try {
+                // If that fails, try with gemini-1.5-pro
+                model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+                const prompt2Result = await model.generateContent(prompt);
+                responseText = prompt2Result.response.text();
+            } catch (error2) {
+                console.log('Second model attempt failed:', error2.message);
+                throw new Error(`Failed with both model versions. Original error: ${errorMessage}`);
+            }
+        }
+        
+        console.log('Generated response:', responseText);
+        res.send(responseText);
+    } catch (error) {
+        console.error('Detailed error:', error);
+        
+        // Provide API key info (without revealing the key)
+        console.log('API Key starts with:', apiKey.substring(0, 5) + '...');
+        
+        let errorMessage = 'Error generating content: ' + error.message;
+        res.status(500).send(errorMessage);
+    }
+}
+
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Make sure you have set a valid GEMINI_API_KEY in your .env file`);
 });
