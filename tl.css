@@ -1,0 +1,178 @@
+/* Colorful Theme Styles */
+:root {
+    --primary: #6e48aa;
+    --secondary: #9d50bb;
+    --accent: #4776E6;
+    --user-bubble: #ff9a9e;
+    --ai-bubble: #a18cd1;
+    --text-light: #ffffff;
+    --text-dark: #2c3e50;
+  }
+  
+  /* Gradient Background */
+  body {
+    font-family: 'Poppins', sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+  }
+  
+  /* Header with Gradient Text */
+  h1 {
+    background: linear-gradient(45deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  /* Neon Glass Chat Container */
+  #chat-container {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    min-height: 60vh;
+    max-height: 65vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Colorful Message Bubbles */
+  .message {
+    margin-bottom: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 1.5rem;
+    line-height: 1.5;
+    max-width: 75%;
+    word-wrap: break-word;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    font-weight: 500;
+  }
+  
+  .user-message {
+    background: linear-gradient(45deg, var(--user-bubble), #fad0c4);
+    margin-left: auto;
+    border-bottom-right-radius: 0.5rem;
+    color: var(--text-dark);
+  }
+  
+  .ai-message {
+    background: linear-gradient(45deg, var(--ai-bubble), var(--secondary));
+    margin-right: auto;
+    border-bottom-left-radius: 0.5rem;
+    color: var(--text-light);
+  }
+  
+  /* Vibrant Input Area */
+  #input-area {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  #prompt-input {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 2rem;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+  }
+  
+  #prompt-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(71, 118, 230, 0.2);
+  }
+  
+  /* Gradient Button */
+  button {
+    background: linear-gradient(45deg, var(--primary), var(--accent));
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(110, 72, 170, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(110, 72, 170, 0.4);
+  }
+  
+  button:disabled {
+    background: linear-gradient(45deg, #cccccc, #999999);
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* Animated Typing Indicator */
+  .typing-indicator {
+    display: inline-flex;
+    padding: 1rem;
+  }
+  
+  .typing-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    background: linear-gradient(45deg, var(--ai-bubble), var(--secondary));
+    animation: typingAnimation 1.4s infinite both;
+  }
+  
+  @keyframes typingAnimation {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+    30% { transform: translateY(-8px); opacity: 1; }
+  }
+  
+  /* Scrollbar Styling */
+  #chat-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  #chat-container::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+    border-radius: 10px;
+  }
+  
+  #chat-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(var(--primary), var(--secondary));
+    border-radius: 10px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    body {
+      padding: 1rem;
+    }
+    
+    #chat-container {
+      min-height: 50vh;
+      max-height: 55vh;
+    }
+    
+    .message {
+      max-width: 85%;
+    }
+  }

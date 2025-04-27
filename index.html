@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini AI Chat</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #202124;
+      text-align: center;
+    }
+    #chat-container {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+      min-height: 300px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    #prompt-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #dfe1e5;
+      border-radius: 24px;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 24px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #1765cc;
+    }
+    button:disabled {
+      background: #9e9e9e;
+      cursor: not-allowed;
+    }
+    .message {
+      margin-bottom: 15px;
+      padding: 12px 16px;
+      border-radius: 18px;
+      line-height: 1.5;
+    }
+    .user-message {
+      background: #e3f2fd;
+      margin-left: 20%;
+      border-bottom-right-radius: 4px;
+    }
+    .ai-message {
+      background: #f1f3f4;
+      margin-right: 20%;
+      border-bottom-left-radius: 4px;
+    }
+    .typing-indicator {
+      display: inline-block;
+      padding: 10px;
+    }
+    .typing-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #5f6368;
+      margin-right: 4px;
+      animation: typingAnimation 1.4s infinite both;
+    }
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    @keyframes typingAnimation {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Gemini AI Chat</h1>
+  
+  <div id="chat-container">
+    <div class="message ai-message">
+      Hello! I'm Gemini AI. Ask me anything.
+    </div>
+  </div>
+
+  <div>
+    <input 
+      type="text" 
+      id="prompt-input" 
+      placeholder="Type your question here..." 
+      autocomplete="off"
+    >
+    <button id="send-button">Send</button>
+  </div>
+
+  <script>
+    const chatContainer = document.getElementById('chat-container');
+    const promptInput = document.getElementById('prompt-input');
+    const sendButton = document.getElementById('send-button');
+
+    // Handle Enter key press
+    promptInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendButton.click();
+      }
+    });
+
+    // Handle send button click
+    sendButton.addEventListener('click', async () => {
+      const prompt = promptInput.value.trim();
+      if (!prompt) return;
+
+      // Add user message to chat
+      addMessage(prompt, 'user');
+      promptInput.value = '';
+      sendButton.disabled = true;
+
+      // Show typing indicator
+      const typingId = showTypingIndicator();
+
+      try {
+        // Call backend API
+        const response = await fetch(`/generate-content?prompt=${encodeURIComponent(prompt)}`);
+        if (!response.ok) throw new Error('API request failed');
+        
+        const aiResponse = await response.text();
+        
+        // Remove typing indicator and add AI response
+        removeTypingIndicator(typingId);
+        addMessage(aiResponse, 'ai');
+      } catch (error) {
+        removeTypingIndicator(typingId);
+        addMessage("Sorry, I couldn't process your request. Please try again.", 'ai');
+        console.error('Error:', error);
+      } finally {
+        sendButton.disabled = false;
+        promptInput.focus();
+      }
+    });
+
+    function addMessage(text, sender) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${sender}-message`;
+      messageDiv.textContent = text;
+      chatContainer.appendChild(messageDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'message ai-message typing-indicator';
+      typingDiv.id = 'typing-' + Date.now();
+      
+      typingDiv.innerHTML = `
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+      `;
+      
+      chatContainer.appendChild(typingDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      return typingDiv.id;
+    }
+
+    function removeTypingIndicator(id) {
+      const indicator = document.getElementById(id);
+      if (indicator) indicator.remove();
+    }
+  </script>
+</body>
+</html>
