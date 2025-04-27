@@ -24,7 +24,7 @@ app.get('/generate-content', async (req, res) => {
     res.send(apiResponse);
   } catch (error) {
     // Handle any errors
-    res.status(500).send('An error occurred while generating content.');
+    res.status(500).send('Oops!!!!!!!!!!!An error occured while generating content.Hehehe :)');
   }
 });
 
