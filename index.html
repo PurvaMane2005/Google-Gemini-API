@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini API Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Gemini AI Demo</h1>
+        <div class="input-container">
+            <textarea id="prompt" placeholder="Enter your prompt here..." required></textarea>
+            <button id="generate">Generate</button>
+        </div>
+        <div id="output" class="output"></div>
+    </div>
+
+    <script>
+        document.getElementById('generate').addEventListener('click', async () => {
+            const promptInput = document.getElementById('prompt');
+            const outputDiv = document.getElementById('output');
+            const generateButton = document.getElementById('generate');
+
+            if (!promptInput.value.trim()) {
+                outputDiv.textContent = 'Please enter a prompt';
+                return;
+            }
+
+            generateButton.disabled = true;
+            outputDiv.textContent = 'Generating...';
+
+            try {
+                const response = await fetch('http://localhost:3000/generate-content', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: promptInput.value })
+                });
+
+                const text = await response.text();
+                
+                if (!response.ok) {
+                    throw new Error(text || 'Failed to generate content');
+                }
+                
+                outputDiv.textContent = text;
+            } catch (error) {
+                console.error('Error:', error);
+                outputDiv.textContent = `Error: ${error.message}`;
+            } finally {
+                generateButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
